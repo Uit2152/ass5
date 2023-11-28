@@ -1,0 +1,129 @@
+﻿@{
+    ViewBag.Title = "Products";
+    var dataFile = Server.MapPath("~/App_Data/Products.txt");
+    string[] products = File.ReadAllLines(dataFile);
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    <style>
+        .button{
+            background-color: white;
+            border: none;
+        }
+        img {
+            float: left;
+        }
+        table {
+            width: auto;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align:center;
+        }
+
+        .het-hang {
+            color: red;
+            font-weight:bold;
+        }
+
+        .con-hang {
+            font-weight: bold;
+        }
+
+        .add-to-cart {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h3 style="font-weight:bold;">Products</h3>
+        <h2 style="font-weight:bold;">Reading Data from a File</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Tên</th>
+                    <th>Giá</th>
+                    <th>Tình Trạng</th>
+                    <th>Thương Hiệu</th>
+                    <th>Thêm vào giỏ hàng</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (string dataLine in products)
+                {
+                    string[] product = dataLine.Split('|');
+
+                    //product[0]=STT; product[1]=Tên; product[2]=Giá; product[4]=Tình trạng ;product[3]=Thương hiệu; product[5]=miêu tả sản phẩm; product[6]=image-link ;
+                    if (product.Length >=7 )
+                    {
+                        string imageUrl = product[6].Trim();
+
+                        // Try parsing quantity and price
+                        if (int.TryParse(product[4], out int quantity) && int.TryParse(product[2], out int price))
+                        {
+                            string statusClass = (quantity > 0) ? "con-hang" : "het-hang";
+                            string price_str = string.Format("{0:0,0 VNĐ}", price);
+
+                            <tr>
+                        <!--Cột STT -->
+                                <td style="text-align:justify;">@product[0]</td>
+                        <!--Cột Tên sản phẩm -->
+                                <td style="text-align:left;">
+                                    <img src="@Url.Content("~/Content/" + imageUrl)" alt="Product Image" height=150 width=150 />
+                                    <h5 style="color:orangered; font-weight:bold;" >@product[1]</h5>
+                                    <p>@product[5]</p>
+                                </td>
+                        <!--Cột Tên giá -->
+                                <td>@price_str</td>
+                        <!--Cột Tình trạng -->
+                                <td class="tinh-trang">
+                                    <span class="@statusClass">@((quantity > 0) ? "Còn hàng" : "Hết hàng")</span><br />
+                                    <span>(@quantity)</span>
+                                </td>
+                        <!--Cột Thương hiệu -->
+                                <td>@product[3]</td>
+                        <!--lựa chọn thêm sản phẩm -->
+                                <td class="add-to-cart">
+                                    @if (quantity > 0)
+                                    {
+                                        <button class="button" onclick="addToCart('@product[0]')">Thêm vào giỏ hàng</button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            // Handle invalid quantity or price format
+                            <tr>
+                                <td colspan="6" style="background:yellow;">Invalid data format for product at position: @product[0]</td>
+                            </tr>
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function addToCart(productId) {
+            // Implement your logic to add the product with the specified ID to the shopping cart
+            alert('Product added to the cart: ' + productId);
+
+        }
+    </script>
+</body>
+</html>

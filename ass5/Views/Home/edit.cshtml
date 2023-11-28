@@ -1,0 +1,170 @@
+﻿@{
+    string product_Id = Request["id"];
+
+    // Find the product with the given ID
+    string filePath = Server.MapPath("~/App_Data/Products.txt");
+    string[] products = System.IO.File.ReadAllLines(filePath);
+    string productToUpdate = products.FirstOrDefault(line => line.StartsWith(product_Id + "|"));
+
+    Action<List<string>> SaveToFile = (productLines) =>
+    {
+        System.IO.File.WriteAllLines(filePath, productLines);
+    };
+
+    if (productToUpdate != null)
+    {
+        string title = "";
+        string summary = "";
+        string image = "";
+        string price = "";
+        string number = "";
+     
+
+        string[] product = productToUpdate.Split('|');
+        
+        // Ensure that 'parts' is not null and has at least 7 elements before accessing them
+        //product[0]=STT; product[1]=Tên; product[2]=Giá; product[4]=Tình trạng ;product[3]=Thương hiệu; product[5]=miêu tả sản phẩm; product[6]=image-link ;
+
+        if (product != null && product.Length >= 7)
+        {
+            title= product[1];
+            summary = product[5];
+            image = product[6];
+            price = product[2];
+            number = product[4];
+
+        }
+    }
+
+
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    <style>
+        .button {
+            background-color: white;
+            border: none;
+        }
+
+        img {
+            float: left;
+        }
+
+        table {
+            width: auto;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        .het-hang {
+            color: red;
+            font-weight: bold;
+        }
+
+        .con-hang {
+            font-weight: bold;
+        }
+
+        .add-to-cart {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h3 style="font-weight:bold;">Cập nhập Sản phẩm</h3>
+    <h2 style="font-weight:bold;">Product</h2>
+
+    @if (productToUpdate != null)
+    {
+        string title = "";
+        string summary = "";
+        string image = "";
+        string price = "";
+        string number = "";
+
+
+        string[] product = productToUpdate.Split('|');
+
+        // Ensure that 'parts' is not null and has at least 7 elements before accessing them
+        //product[0]=STT; product[1]=Tên; product[2]=Giá; product[4]=Tình trạng ;product[3]=Thương hiệu; product[5]=miêu tả sản phẩm; product[6]=image-link ;
+
+        if (product != null && product.Length >= 7)
+        {
+            title = product[1];
+            summary = product[5];
+            image = product[6];
+            price = product[2];
+            number = product[4];
+
+            <form id="productForm" method="post" action="">
+                <fieldset>
+                    <legend style="text-transform:uppercase;">Product</legend>
+
+                    <div class="box">
+                        <label>Title</label>
+                        <input type="text" id="title" name="title" value=@title /><br />
+                    </div>
+                    <div class="box">
+                        <label>Summary</label>
+                        <input type="text" id="summary" name="summary" value=@summary /><br />
+                    </div>
+                    <div class="box">
+                        <label>Image URL</label>
+                        <input type="text" id="imageURL" name="imageURL" vallue=@image /><br />
+                    </div>
+                    <div class="box">
+                        <label>Price</label>
+                        <input type="number" id="price" name="price" value=@price /><br />
+                    </div>
+                    <div class="box">
+                        <label>Number</label>
+                        <input type="number" id="number" name="number" value=@number /><br />
+                    </div>
+                    <button type="submit" id="create" name="create">Create</button>
+                </fieldset>
+            </form>
+        }
+
+
+
+
+
+        @if (IsPost)
+        {
+            // Process the form submission
+            var newProduct = $"{product_Id}|{Request["title"]}|{Request["summary"]}|{Request["imageURL"]}|{Request["price"]}|{Request["number"]}";
+
+            var updatedLines = products.ToList();
+            updatedLines.Add(newProduct);
+            SaveToFile(updatedLines);
+            Response.Redirect(Request.Url.AbsolutePath);
+        }
+
+
+        <script>
+            function deleteProduct(productId) {
+                if (confirm("Are you sure you want to delete this product?")) {
+                    // Implement deletion logic
+                    var updatedLines = lines.filter(line => line.startsWith(productId + "|") === false);
+                    SaveToFile(updatedLines);
+                    location.reload(); // Refresh the page
+                }
+            }
+        </script>
+
+    </body>
+</html>
